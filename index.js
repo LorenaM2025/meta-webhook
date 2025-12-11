@@ -3,16 +3,22 @@ const app = express();
 
 app.use(express.json());
 
+// 👉 Definís acá el mismo token que pusiste en Meta
+const VERIFY_TOKEN = "PruebaBNI";
+
 // Verificación de webhook (GET)
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
-  if (mode && token === "PruebaBNI") {
-    // Token correcto → devolver el challenge para que Meta lo valide
+  // Meta espera exactamente esto:
+  // mode === 'subscribe' y token que coincida
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    console.log("WEBHOOK_VERIFIED");
     res.status(200).send(challenge);
   } else {
+    console.log("WEBHOOK_VERIFICATION_FAILED", { mode, token });
     res.sendStatus(403);
   }
 });
